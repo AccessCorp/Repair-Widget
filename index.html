@@ -5,7 +5,7 @@
   <title>Repair Approval Widget</title>
   <style>
     body {
-      max-width: 95%;
+      max-width: 90%;
       margin: auto;
       font-family: Arial, sans-serif;
     }
@@ -50,6 +50,11 @@
       background-color: #f0f0f0;
       border: none;
     }
+    .warning {
+      color: red;
+      font-size: 0.9em;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -86,7 +91,7 @@
       row.innerHTML = `
         <td><input type="text" value="${data.description || ''}"/></td>
         <td><input type="number" value="${data.cost || ''}"/></td>
-        <td>${responsibilityOptions}</td>
+        <td>${responsibilityOptions}<div class="warning">Overriding management recommendation.</div></td>
         <td>
           <select>
             <option value="Pending" ${data.approval === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -103,10 +108,14 @@
       row.querySelectorAll("input, select").forEach(el => el.addEventListener('change', updateOutput));
 
       const responsibilitySelect = row.querySelector('.responsibility-select');
+      const warningDiv = row.querySelector('.warning');
+
       if (responsibilitySelect) {
         responsibilitySelect.addEventListener('change', function () {
           if (data.responsibility && data.responsibility !== this.value) {
-            alert("You have changed the responsibility designation. Please be aware this overrides management's recommendation.");
+            warningDiv.style.display = 'block';
+          } else {
+            warningDiv.style.display = 'none';
           }
         });
       }
