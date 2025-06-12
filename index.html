@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <title>Repair Approval Widget</title>
   <style>
+    body {
+      max-width: 95%; /* Reduced width by 5% */
+      margin: auto;
+      font-family: Arial, sans-serif;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -31,6 +36,7 @@
     textarea {
       width: 100%;
       height: 100px;
+      display: none; /* Hide the exported data from client */
     }
   </style>
 </head>
@@ -49,7 +55,7 @@
   </table>
   <button class="add-row" onclick="addRow()">Add Repair</button>
   <br><br>
-  <label for="output">Exported Data:</label>
+  <label for="output" style="display:none;">Exported Data:</label>
   <textarea id="output" readonly></textarea>
 
   <script>
@@ -57,15 +63,16 @@
       const table = document.getElementById("table-body");
       const row = document.createElement("tr");
 
+      const responsibilityOptions = `
+        <select class="responsibility-select">
+          <option value="Tenant" ${data.responsibility === 'Tenant' ? 'selected' : ''}>Tenant</option>
+          <option value="Owner" ${data.responsibility === 'Owner' ? 'selected' : ''}>Owner</option>
+        </select>`;
+
       row.innerHTML = `
         <td><input type="text" value="${data.description || ''}"/></td>
         <td><input type="number" value="${data.cost || ''}"/></td>
-        <td>
-          <select>
-            <option value="Tenant" ${data.responsibility === 'Tenant' ? 'selected' : ''}>Tenant</option>
-            <option value="Owner" ${data.responsibility === 'Owner' ? 'selected' : ''}>Owner</option>
-          </select>
-        </td>
+        <td>${responsibilityOptions}</td>
         <td>
           <select>
             <option value="Pending" ${data.approval === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -80,6 +87,15 @@
       updateOutput();
 
       row.querySelectorAll("input, select").forEach(el => el.addEventListener('change', updateOutput));
+
+      const responsibilitySelect = row.querySelector('.responsibility-select');
+      if (responsibilitySelect) {
+        responsibilitySelect.addEventListener('change', function () {
+          if (data.responsibility && data.responsibility !== this.value) {
+            alert("You have changed the responsibility designation. Please be aware this overrides management's recommendation.");
+          }
+        });
+      }
     }
 
     function removeRow(button) {
