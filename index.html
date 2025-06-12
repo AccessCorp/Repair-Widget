@@ -5,7 +5,7 @@
   <title>Repair Approval Widget</title>
   <style>
     body {
-      max-width: 95%; /* Reduced width by 5% */
+      max-width: 95%;
       margin: auto;
       font-family: Arial, sans-serif;
     }
@@ -36,7 +36,19 @@
     textarea {
       width: 100%;
       height: 100px;
-      display: none; /* Hide the exported data from client */
+      display: none;
+    }
+    .hide-action th.action-header,
+    .hide-action td.action-cell,
+    .hide-action .remove-row,
+    .hide-action .add-row {
+      display: none !important;
+    }
+    .read-only input,
+    .read-only select {
+      pointer-events: none;
+      background-color: #f0f0f0;
+      border: none;
     }
   </style>
 </head>
@@ -48,7 +60,7 @@
         <th>Cost ($)</th>
         <th>Responsibility</th>
         <th>Approval</th>
-        <th>Action</th>
+        <th class="action-header">Action</th>
       </tr>
     </thead>
     <tbody id="table-body"></tbody>
@@ -59,6 +71,8 @@
   <textarea id="output" readonly></textarea>
 
   <script>
+    let isPrefillStep = true; // Toggle to false to simulate end-user view
+
     function addRow(data = {}) {
       const table = document.getElementById("table-body");
       const row = document.createElement("tr");
@@ -80,7 +94,7 @@
             <option value="Denied" ${data.approval === 'Denied' ? 'selected' : ''}>Denied</option>
           </select>
         </td>
-        <td><button class="remove-row" onclick="removeRow(this)">Remove</button></td>
+        <td class="action-cell"><button class="remove-row" onclick="removeRow(this)">Remove</button></td>
       `;
 
       table.appendChild(row);
@@ -120,6 +134,10 @@
     }
 
     window.onload = () => {
+      if (!isPrefillStep) {
+        document.body.classList.add("hide-action");
+        document.body.classList.add("read-only");
+      }
       if (window.prefillData && Array.isArray(window.prefillData)) {
         window.prefillData.forEach(item => addRow(item));
       } else {
