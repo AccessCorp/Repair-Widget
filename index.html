@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Repair Approval Widget</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    .add-row {
+      margin-top: 10px;
+      padding: 6px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .remove-row {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+    }
+  </style>
+</head>
+<body>
+  <table id="repair-table">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Cost ($)</th>
+        <th>Responsibility</th>
+        <th>Approval</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+  <button class="add-row" onclick="addRow()">Add Repair</button>
+  <br><br>
+  <label for="output">Exported Data:</label>
+  <textarea id="output" readonly></textarea>
+
+  <script>
+    function addRow(data = {}) {
+      const table = document.getElementById("table-body");
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td><input type="text" value="${data.description || ''}"/></td>
+        <td><input type="number" value="${data.cost || ''}"/></td>
+        <td>
+          <select>
+            <option value="Tenant" ${data.responsibility === 'Tenant' ? 'selected' : ''}>Tenant</option>
+            <option value="Owner" ${data.responsibility === 'Owner' ? 'selected' : ''}>Owner</option>
+          </select>
+        </td>
+        <td>
+          <select>
+            <option value="Pending" ${data.approval === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Approved" ${data.approval === 'Approved' ? 'selected' : ''}>Approved</option>
+            <option value="Denied" ${data.approval === 'Denied' ? 'selected' : ''}>Denied</option>
+          </select>
+        </td>
+        <td><button class="remove-row" onclick="removeRow(this)">Remove</button></td>
+      `;
+
+      table.appendChild(row);
+      updateOutput();
+
+      row.querySelectorAll("input, select").forEach(el => el.addEventListener('change', updateOutput));
+    }
+
+    function removeRow(button) {
+      const row = button.closest("tr");
+      row.remove();
+      updateOutput();
+    }
+
+    function updateOutput() {
+      const rows = document.querySelectorAll("#repair-table tbody tr");
+      const data = [];
+      rows.forEach(row => {
+        const [desc, cost, resp, appr] = row.querySelectorAll("input, select");
+        data.push({
+          description: desc.value,
+          cost: parseFloat(cost.value) || 0,
+          responsibility: resp.value,
+          approval: appr.value
+        });
+      });
+      document.getElementById("output").value = JSON.stringify(data, null, 2);
+    }
+
+    window.onload = () => {
+      if (window.prefillData && Array.isArray(window.prefillData)) {
+        window.prefillData.forEach(item => addRow(item));
+      } else {
+        addRow();
+      }
+    };
+  </script>
+</body>
+</html>
